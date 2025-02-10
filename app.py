@@ -1,4 +1,3 @@
-
 import praw
 import pandas as pd
 import re
@@ -20,11 +19,10 @@ try:
     reddit = praw.Reddit(
         client_id="AFy3XhSB0Cb1B12ikjMaCQ",       # Your new Reddit client ID
         client_secret="wob8ERSGMk9S6vBQ_2sucbBdxXOfIw", # Your new Reddit client secret
-        user_agent="Watch Sentiment Analysis App",       # Your new Reddit user agent
-        username="your_reddit_username", # Your Reddit username
-        password="your_reddit_password"  # Your Reddit password
+        user_agent="Watch Sentiment Analysis App"       # Your new Reddit user agent
     )
-    reddit.read_only = True  # Verify connection
+    # Test the Reddit API connection
+    reddit.user.me()  # This will raise an exception if authentication fails
     st.success("Reddit API connection successful!")
 except Exception as e:
     st.error(f"Failed to connect to Reddit API: {e}")
@@ -36,17 +34,19 @@ brands = ["Omega", "Breitling", "Tag Heuer", "Cartier", "Rolex", "Longines", "Ra
 # Scrape Reddit Data
 def scrape_reddit_data(brand, subreddit="Watches", limit=50):
     try:
-        subreddit = reddit.subreddit(subreddit)
-        posts = subreddit.search(brand, limit=limit)
+        subreddit_instance = reddit.subreddit(subreddit)
+        posts = subreddit_instance.search(brand, limit=limit)
         
         data = []
         for post in posts:
             data.append([brand, post.title, post.selftext, post.score])
         
         return data
+    except praw.exceptions.PRAWException as e:
+        st.error(f"Reddit API Exception for {brand}: {e}")
     except Exception as e:
         st.error(f"Error fetching data for {brand}: {e}")
-        return []
+    return []
 
 # Collect data for all brands with live feedback
 all_data = []
