@@ -1,4 +1,4 @@
-import praw
+import tweepy
 import pandas as pd
 import re
 import nltk
@@ -14,52 +14,43 @@ import os
 # Load environment variables
 load_dotenv()
 
-# Initialize Reddit API with error handling
+# Twitter API credentials
+consumer_key = os.getenv("TWITTER_CONSUMER_KEY")
+consumer_secret = os.getenv("TWITTER_CONSUMER_SECRET")
+access_token = os.getenv("TWITTER_ACCESS_TOKEN")
+access_token_secret = os.getenv("TWITTER_ACCESS_TOKEN_SECRET")
+
+# Authenticate with Twitter API
 try:
-    reddit = praw.Reddit(
-        client_id="AFy3XhSB0Cb1B12ikjMaCQ",       # Your new Reddit client ID
-        client_secret="wob8ERSGMk9S6vBQ_2sucbBdxXOfIw", # Your new Reddit client secret
-        user_agent="Watch Sentiment Analysis App"       # Your new Reddit user agent
-    )
-    # Test the Reddit API connection
-    reddit.user.me()  # This will raise an exception if authentication fails
-    st.success("Reddit API connection successful!")
+    auth = tweepy.OAuth1UserHandler(consumer_key, consumer_secret, access_token, access_token_secret)
+    api = tweepy.API(auth, wait_on_rate_limit=True)
+    st.success("Twitter API connection successful!")
 except Exception as e:
-    st.error(f"Failed to connect to Reddit API: {e}")
+    st.error(f"Failed to connect to Twitter API: {e}")
 
 # Watch brands to analyze
 brands = ["Omega", "Breitling", "Tag Heuer", "Cartier", "Rolex", "Longines", "Rado", 
           "Tissot", "Hublot", "Patek Philippe", "Swatch", "Chopard", "Ulysse Nardin"]
 
-# Scrape Reddit Data
-def scrape_reddit_data(brand, subreddit="all", limit=50):
+# Scrape Twitter Data
+def scrape_twitter_data(brand, count=100):
     try:
-        subreddit_instance = reddit.subreddit(subreddit)
-        posts = subreddit_instance.top(limit=limit)  # Fetch top posts instead of searching
-        
-        data = []
-        for post in posts:
-            if brand.lower() in (post.title + post.selftext).lower():  # Filter posts by brand keyword
-                data.append([brand, post.title, post.selftext, post.score])
-        
+        tweets = api.search_tweets(q=brand, count=count, lang="en", tweet_mode="extended")
+        data = [[brand, tweet.full_text, tweet.favorite_count] for tweet in tweets]
         return data
-    except praw.exceptions.APIException as e:
-        st.error(f"Reddit API Exception for {brand}: {e.message}")
-    except praw.exceptions.PRAWException as e:
-        st.error(f"Reddit API Exception for {brand}: {e}")
     except Exception as e:
-        st.error(f"Error fetching data for {brand}: {e}")
-    return []
+        st.error(f"Error fetching Twitter data for {brand}: {e}")
+        return []
 
 # Collect data for all brands with live feedback
 all_data = []
 for brand in brands:
-    st.write(f"Fetching data for: {brand}...")
-    all_data.extend(scrape_reddit_data(brand))
+    st.write(f"Fetching tweets for: {brand}...")
+    all_data.extend(scrape_twitter_data(brand))
 
 # Convert to DataFrame
 if all_data:
-    df = pd.DataFrame(all_data, columns=['Brand', 'Title', 'Text', 'Upvotes'])
+    df = pd.DataFrame(all_data, columns=['Brand', 'Text', 'Likes'])
 
     def clean_text(text):
         text = text.lower()
@@ -70,8 +61,7 @@ if all_data:
         return " ".join(tokens)
 
     # Apply text cleaning
-    df['Cleaned_Text'] = df['Title'] + " " + df['Text']
-    df['Cleaned_Text'] = df['Cleaned_Text'].apply(clean_text)
+    df['Cleaned_Text'] = df['Text'].apply(clean_text)
 
     # Sentiment Analysis
     nltk.download('vader_lexicon')
@@ -80,7 +70,7 @@ if all_data:
     df['Sentiment'] = df['Sentiment_Score'].apply(lambda x: "Positive" if x > 0 else ("Negative" if x < 0 else "Neutral"))
 
     # Streamlit Web App
-    st.title("Watch Brand Sentiment Analysis")
+    st.title("Watch Brand Sentiment Analysis - Twitter")
 
     selected_brand = st.selectbox("Select a Brand", brands)
 
@@ -97,6 +87,6 @@ if all_data:
     st.dataframe(df[df['Brand'] == selected_brand])
 
     # Save Data
-    df.to_csv("watch_brand_sentiment.csv", index=False)
+    df.to_csv("watch_brand_sentiment_twitter.csv", index=False)
 else:
-    st.error("No data fetched. Please check the Reddit API or brand names.")
+    st.error("No data fetched. Please check the Twitter API or brand names.")
