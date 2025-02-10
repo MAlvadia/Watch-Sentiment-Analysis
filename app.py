@@ -17,9 +17,9 @@ load_dotenv()
 # Initialize Reddit API with error handling
 try:
     reddit = praw.Reddit(
-        client_id="K3zbWyd8FQ8zy9zWME5F2Q",       # Your Reddit client ID
-        client_secret="HJentAD806zJy5X0k0c5Ch8HG59rIA", # Your Reddit client secret
-        user_agent="Watch Sentiment Analysis App",       # Your Reddit user agent
+        client_id="AFy3XhSB0Cb1B12ikjMaCQ",       # Your new Reddit client ID
+        client_secret="wob8ERSGMk9S6vBQ_2sucbBdxXOfIw", # Your new Reddit client secret
+        user_agent="Watch Sentiment Analysis App",       # Your new Reddit user agent
         username="your_reddit_username", # Your Reddit username
         password="your_reddit_password"  # Your Reddit password
     )
