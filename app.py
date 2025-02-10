@@ -35,11 +35,12 @@ brands = ["Omega", "Breitling", "Tag Heuer", "Cartier", "Rolex", "Longines", "Ra
 def scrape_reddit_data(brand, subreddit="all", limit=50):
     try:
         subreddit_instance = reddit.subreddit(subreddit)
-        posts = subreddit_instance.search(brand, limit=limit)
+        posts = subreddit_instance.top(limit=limit)  # Fetch top posts instead of searching
         
         data = []
         for post in posts:
-            data.append([brand, post.title, post.selftext, post.score])
+            if brand.lower() in (post.title + post.selftext).lower():  # Filter posts by brand keyword
+                data.append([brand, post.title, post.selftext, post.score])
         
         return data
     except praw.exceptions.APIException as e:
