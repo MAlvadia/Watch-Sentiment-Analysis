@@ -17,9 +17,9 @@ load_dotenv()
 # Initialize Reddit API with error handling
 try:
     reddit = praw.Reddit(
-        client_id=os.getenv("CLIENT_ID"),       # Reddit client ID
-        client_secret=os.getenv("CLIENT_SECRET"), # Reddit client secret
-        user_agent=os.getenv("USER_AGENT")       # Reddit user agent
+        client_id="K3zbWyd8FQ8zy9zWME5F2Q",       # Your Reddit client ID
+        client_secret="HJentAD806zJy5X0k0c5Ch8HG59rIA", # Your Reddit client secret
+        user_agent="Watch Sentiment Analysis App"       # Your Reddit user agent
     )
     reddit.read_only = True  # Verify connection
     st.success("Reddit API connection successful!")
