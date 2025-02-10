@@ -1,8 +1,6 @@
 praw
 pandas
-re
 nltk
 matplotlib
 wordcloud
 streamlit
-
