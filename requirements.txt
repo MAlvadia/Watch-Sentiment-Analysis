@@ -4,3 +4,4 @@ nltk
 matplotlib
 wordcloud
 streamlit
+python-dotenv
