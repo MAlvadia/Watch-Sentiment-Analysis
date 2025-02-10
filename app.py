@@ -32,7 +32,7 @@ brands = ["Omega", "Breitling", "Tag Heuer", "Cartier", "Rolex", "Longines", "Ra
           "Tissot", "Hublot", "Patek Philippe", "Swatch", "Chopard", "Ulysse Nardin"]
 
 # Scrape Reddit Data
-def scrape_reddit_data(brand, subreddit="Watches", limit=50):
+def scrape_reddit_data(brand, subreddit="all", limit=50):
     try:
         subreddit_instance = reddit.subreddit(subreddit)
         posts = subreddit_instance.search(brand, limit=limit)
@@ -42,6 +42,8 @@ def scrape_reddit_data(brand, subreddit="Watches", limit=50):
             data.append([brand, post.title, post.selftext, post.score])
         
         return data
+    except praw.exceptions.APIException as e:
+        st.error(f"Reddit API Exception for {brand}: {e.message}")
     except praw.exceptions.PRAWException as e:
         st.error(f"Reddit API Exception for {brand}: {e}")
     except Exception as e:
